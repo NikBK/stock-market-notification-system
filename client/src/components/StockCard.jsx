@@ -1,47 +1,59 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import PopUpError from "./PopUpError";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const SUBSCRIBE_URL = `${BACKEND_URL}/subscribe/createSubscription`;
 const UNSUBSCRIBE_URL = `${BACKEND_URL}/subscribe/deleteSubscription`;
 
 const StockCard = ({ stock, subscriptions }) => {
-
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [error, setError] = useState({ hasError: false, message: "" });
 
     useEffect(() => {
-        subscriptions.map(subscription => {
+        subscriptions.forEach(subscription => {
             const { stockType, stockName } = subscription;
             if (stock.type === stockType && stock.name === stockName) {
                 setIsSubscribed(true);
             }
         })
-    }, [])
+    }, [subscriptions])
 
-    const handleStockAlert = () => {
-        if (!isSubscribed) {
-            axios
-                .post(SUBSCRIBE_URL, {
+    useEffect(() => {
+        if (error.hasError) {
+            setTimeout(() => {
+                setError({ hasError: false, message: "" })
+            }, 7000)
+        }
+    }, [error])
+
+    const subscribe = () => {
+        axios
+            .post(SUBSCRIBE_URL, {
+                "user": "TestUser",
+                "stockName": stock.name,
+                "stockType": stock.type,
+                "thresholdPrice": stock.price
+            })
+            .then(response => setIsSubscribed(prev => !prev))
+            .catch(error => setError({ hasError: true, message: error.message }))
+    }
+
+    const unsubscribe = () => {
+        axios
+            .delete(UNSUBSCRIBE_URL, {
+                data: {
                     "user": "TestUser",
                     "stockName": stock.name,
-                    "stockType": stock.type,
-                    "thresholdPrice": stock.price
-                })
-                .then(response => setIsSubscribed(prev => !prev))
-                .catch(error => console.log(error))
-        }
-        else {
-            axios
-                .delete(UNSUBSCRIBE_URL, {
-                    data: {
-                        "user": "TestUser",
-                        "stockName": stock.name,
-                        "stockType": stock.type
-                    }
-                })
-                .then(response => setIsSubscribed(prev => !prev))
-                .catch(error => console.log(error))
-        }
+                    "stockType": stock.type
+                }
+            })
+            .then(response => setIsSubscribed(prev => !prev))
+            .catch(error => setError({ hasError: true, message: error.message }))
+    }
+
+    const handleStockAlert = () => {
+        isSubscribed ? unsubscribe() : subscribe();
     }
 
     return (
@@ -56,6 +68,7 @@ const StockCard = ({ stock, subscriptions }) => {
                     {isSubscribed ? 'Remove Alert' : 'Get Alert'}
                 </button>
             </div>
+            {error.hasError && <PopUpError message={error.message} />}
         </div>
     )
 }

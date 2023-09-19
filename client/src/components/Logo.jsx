@@ -1,5 +1,3 @@
-// import { logo } from "./assets/images/app_logo.PNG";
-
 const Logo = () => {
     return (
         <img
