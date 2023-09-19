@@ -1,10 +1,10 @@
-import { logo } from "assets/images/app_logo.PNG";
+// import { logo } from "./assets/images/app_logo.PNG";
 
 const Logo = () => {
     return (
         <img
             alt="app-logo"
-            src={logo}
+            src="/assets/images/app_logo.PNG"
             className="w-8 h-8 self-center hover:cursor-pointer"
         />
     )
