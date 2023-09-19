@@ -20,6 +20,10 @@ app.use("/stocks", stocksRoute);
 app.use("/subscribe", subscriptionRoute);
 app.use("/alerts", alertsRoute);
 
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "Yes, you have arrived to the right end point" })
+})
+
 mongoose.connect(`${MONGODB_CONECTION_URL}/${DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => app.listen(PORT, () => console.log(`Listening to port ${PORT}`)))
     .catch((error) => console.log(`Error connecting to port ${PORT} with message: ${error.message}`))
